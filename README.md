@@ -86,20 +86,13 @@ kubectl apply -f deploy/deploy-consumer.yaml
 kubectl get deploy
 ```
 
-You should see `rabbitmq-consumer` deployment with 0 pods as there currently aren't any queue messages and for that reason it is scaled to zero.
-
-```cli
-NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-rabbitmq-consumer   0         0         0            0           3s
-```
-
 [This consumer](https://github.com/kedacore/sample-go-rabbitmq/blob/master/cmd/receive/receive.go) is set to consume one message per instance, sleep for 1 second, and then acknowledge completion of the message.  This is used to simulate work.  
 
 ### Publishing messages to the queue
 
 #### Deploy the publisher job
 
-The following job will publish 300 messages to the "hello" queue the deployment is listening to. As the queue builds up, KEDA will help the horizontal pod autoscaler add more and more pods until the queue is drained after about 2 minutes and up to 30 concurrent pods.  You can modify the exact number of published messages in the `deploy-publisher-job.yaml` file.
+The following job will publish 300 messages to the "hello" queue the deployment is listening to. As the queue builds up, You can modify the exact number of published messages in the `deploy-publisher-job.yaml` file.
 
 ```cli
 kubectl apply -f deploy/deploy-publisher-job.yaml
