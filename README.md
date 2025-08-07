@@ -4,17 +4,16 @@ A simple docker container that will receive messages from a RabbitMQ queue and s
 
 ## Pre-requisites
 
-* Kubernetes cluster
-* [KEDA 2.0 installed](https://keda.sh/docs/deploy/) on the cluster
+* [k3s Cluster](https://k3s.io/)
 
 ## Setup
 
-This setup will go through creating a RabbitMQ queue on the cluster and deploying this consumer with the `ScaledObject` to scale via KEDA.  If you already have RabbitMQ you can use your existing queues.
+This setup will go through creating a RabbitMQ queue on the cluster and deploying this consumer and publisher.
 
 First you should clone the project:
 
 ```cli
-git clone https://github.com/kedacore/sample-go-rabbitmq
+git clone https://github.com/vwake7/sample-go-rabbitmq
 cd sample-go-rabbitmq
 ```
 
@@ -94,7 +93,7 @@ NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 rabbitmq-consumer   0         0         0            0           3s
 ```
 
-[This consumer](https://github.com/kedacore/sample-go-rabbitmq/blob/master/cmd/receive/receive.go) is set to consume one message per instance, sleep for 1 second, and then acknowledge completion of the message.  This is used to simulate work.  The [`ScaledObject` included in the above deployment](deploy/deploy-consumer.yaml) is set to scale to a minimum of 0 replicas on no events, and up to a maximum of 30 replicas on heavy events (optimizing for a queue length of 5 message per replica).  After 30 seconds of no events the replicas will be scaled down (cooldown period).  These settings can be changed on the `ScaledObject` as needed.
+[This consumer](https://github.com/kedacore/sample-go-rabbitmq/blob/master/cmd/receive/receive.go) is set to consume one message per instance, sleep for 1 second, and then acknowledge completion of the message.  This is used to simulate work.  
 
 ### Publishing messages to the queue
 
@@ -120,13 +119,10 @@ You can see the number of messages vs the target per pod as well:
 kubectl get hpa
 ```
 
-After the queue is empty and the specified cooldown period (a property of the `ScaledObject`, default of 300 seconds) the last replica will scale back down to zero.
-
 ## Cleanup resources
 
 ```cli
 kubectl delete job rabbitmq-publish
-kubectl delete ScaledObject rabbitmq-consumer
 kubectl delete deploy rabbitmq-consumer
 helm delete rabbitmq
 ```
